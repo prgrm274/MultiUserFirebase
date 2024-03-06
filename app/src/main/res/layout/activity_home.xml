@@ -7,10 +7,19 @@
     tools:context=".ui.home.HomeActivity">
 
     <TextView
+        android:id="@+id/textView"
         android:text="Welcome"
         app:layout_constraintTop_toTopOf="parent"
         android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        tools:itemCount="20"
+        tools:listitem="@layout/item_home" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
