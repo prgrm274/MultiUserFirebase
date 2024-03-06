@@ -13,7 +13,7 @@
         android:theme="@style/Theme.LoginSignupTypicode"
         tools:targetApi="31">
         <activity
-            android:name=".ui.home.HomeAdminActivity"
+            android:name=".ui.homeAdmin.HomeAdminActivity"
             android:exported="false" />
         <activity
             android:name=".ui.home.HomeActivity"
