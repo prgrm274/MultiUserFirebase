@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
     id("com.google.gms.google-services")
+    id("dagger.hilt.android.plugin")
 }
 
 android {
@@ -20,6 +21,14 @@ android {
     }
 
     buildTypes {
+        debug {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -50,6 +59,12 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.retrofit)
     implementation(libs.retrofitConverterGson)
+    implementation(libs.picasso)
+    implementation(libs.hilt)
+    implementation(libs.hiltAndroidCompiler)
+    implementation(libs.hiltCompiler)
+    implementation(libs.hiltLifecycle)
+    implementation(libs.picasso)
     implementation(libs.picasso)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
