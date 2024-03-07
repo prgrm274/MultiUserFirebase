@@ -1,4 +1,4 @@
-package com.programmer270487.loginsignuptypicode.data
+package com.programmer270487.loginsignuptypicode.data.model
 
 data class Photo(
     val albumId: Int,
