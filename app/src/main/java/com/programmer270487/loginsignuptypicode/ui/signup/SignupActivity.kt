@@ -5,18 +5,27 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Toast
+import androidx.activity.viewModels
+import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.programmer270487.loginsignuptypicode.R
+import com.programmer270487.loginsignuptypicode.data.model.Role
 import com.programmer270487.loginsignuptypicode.databinding.ActivitySignupBinding
-import com.programmer270487.loginsignuptypicode.ui.home.HomeActivity
+import com.programmer270487.loginsignuptypicode.ui.login.LoginViewModel
+import com.programmer270487.loginsignuptypicode.utils.State
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SignupActivity : AppCompatActivity() {
     private val b: ActivitySignupBinding by lazy { ActivitySignupBinding.inflate(layoutInflater) }
 
     private val firebaseAuth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
     private val valid = true
+    val viewModel: LoginViewModel by viewModels()
+//    private val viewModel: LoginViewModel by lazy {
+//        ViewModelProvider(this)[LoginViewModel::class.java]
+//    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,16 +34,41 @@ class SignupActivity : AppCompatActivity() {
         val getEmail = intent.getStringExtra("email")
         b.emailEditText.setText(getEmail)
 
+//        observe(null)
+
         b.signupAdminButton.setOnClickListener {
-            signUp(true)
+//            signUp(true)
+            observe(true)
         }
         b.signupButton.setOnClickListener {
-            signUp(false)
+//            signUp(false)
+            observe(false)
         }
 
         b.textBackToLogin.setOnClickListener {
 //            onBackPressedDispatcher.onBackPressed()
             finish()
+        }
+    }
+
+    private fun observe(isAdmin: Boolean) {
+        viewModel.register.observe(this) {
+            when (it) {
+                is State.Loading -> {
+
+                }
+                is State.Success -> {
+                    val uname = b.usernameEditText.text.toString()
+                    val email = b.emailEditText.text.toString()
+                    val password = b.passwordEditText.text.toString()
+                    viewModel.register(
+                        email,
+                        password,
+                        isAdmin
+                    )
+                }
+                is State.Failure -> {}
+            }
         }
     }
 
@@ -71,11 +105,7 @@ class SignupActivity : AppCompatActivity() {
                     }
                     setResult(RESULT_OK, returnIntent)
                     finish()
-//                    onBackPressedDispatcher.onBackPressed()
                 }
-                /*.addOnCanceledListener {
-                    Toast.makeText(this, "Register cancelled", Toast.LENGTH_SHORT).show()
-                }*/
                 .addOnFailureListener {
                     Toast.makeText(
                         this,
