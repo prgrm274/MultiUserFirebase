@@ -1,9 +1,10 @@
 package com.programmer270487.loginsignuptypicode.ui.homeAdmin
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.programmer270487.loginsignuptypicode.data.Role
+import com.programmer270487.loginsignuptypicode.data.model.Role
 import com.programmer270487.loginsignuptypicode.databinding.ItemHomeAdminBinding
 
 class HomeAdminAdapter(private val roles: MutableList<Role>) : RecyclerView.Adapter<HomeAdminAdapter.PhotoViewHolder>() {
@@ -30,12 +31,13 @@ class HomeAdminAdapter(private val roles: MutableList<Role>) : RecyclerView.Adap
     inner class PhotoViewHolder(private val b: ItemHomeAdminBinding) : RecyclerView.ViewHolder(b.root) {
         fun bind(role: Role) {
             b.apply {
-                id.text = "Id: ${role.id}"
+                id.text = "ID: ${role.id}"
                 val adminRole = role.role ?: false
                 if (adminRole) {
-                    this.adminRole.text = "Role: ✔️"
+                    this.adminRole.text = "Admin"
+                    this.adminRole.setTextColor(Color.GREEN)
                 } else {
-                    this.adminRole.text = "Role: x"
+                    this.adminRole.text = "User"
                 }
                 username.text = "Username: " + role.username ?: "Username: Not available"
                 email.text = "Email: " + role.email ?: "Email: Not available"
