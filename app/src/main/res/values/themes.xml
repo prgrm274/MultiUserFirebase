@@ -6,4 +6,8 @@
     </style>
 
     <style name="Theme.LoginSignupTypicode" parent="Base.Theme.LoginSignupTypicode" />
+
+    <style name="ItemText">
+        <item name="android:textColor">@color/white</item>
+    </style>
 </resources>
