@@ -3,7 +3,7 @@ package com.programmer270487.loginsignuptypicode.ui.home
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.programmer270487.loginsignuptypicode.data.Photo
+import com.programmer270487.loginsignuptypicode.data.model.Photo
 import com.programmer270487.loginsignuptypicode.databinding.ItemHomeBinding
 import com.squareup.picasso.Picasso
 
