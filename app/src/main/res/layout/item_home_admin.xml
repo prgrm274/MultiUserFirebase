@@ -6,8 +6,11 @@
     android:layout_height="wrap_content">
 
     <LinearLayout
-        android:paddingHorizontal="7dp"
-        android:paddingBottom="10dp"
+        android:paddingHorizontal="10dp"
+        android:layout_marginHorizontal="5dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/item_home_admin_drawable"
+        android:paddingVertical="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -17,24 +20,28 @@
 
         <TextView
             android:id="@+id/id"
+            style="@style/ItemText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:text="id" />
 
         <TextView
             android:id="@+id/username"
+            style="@style/ItemText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:text="username" />
 
         <TextView
             android:id="@+id/email"
+            style="@style/ItemText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:text="email" />
 
         <TextView
             android:id="@+id/adminRole"
+            style="@style/ItemText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:text="adminRole" />
