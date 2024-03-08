@@ -4,28 +4,26 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.TextUtils
+import android.view.View
 import android.widget.Toast
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.FirebaseFirestore
+import androidx.activity.viewModels
 import com.programmer270487.loginsignuptypicode.databinding.ActivityMainBinding
 import com.programmer270487.loginsignuptypicode.ui.home.HomeActivity
-import com.programmer270487.loginsignuptypicode.ui.home.HomeAdminActivity
+import com.programmer270487.loginsignuptypicode.ui.homeAdmin.HomeAdminActivity
 import com.programmer270487.loginsignuptypicode.ui.signup.SignupActivity
+import com.programmer270487.loginsignuptypicode.utils.State
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class LoginActivity : AppCompatActivity() {
     private val b: ActivityMainBinding by lazy { ActivityMainBinding.inflate(layoutInflater) }
-
-    val firebaseAuth = FirebaseAuth.getInstance()
-    val firestore = FirebaseFirestore.getInstance()
+    private val viewModel: AuthViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(b.root)
 
-//        if (b.emailInputLayout.isFocused) {
-//            b.emailInputLayout.error
-//        }
+        observe()
 
         var emailHasError = false
         var passwordHasError = false
@@ -49,61 +47,10 @@ class LoginActivity : AppCompatActivity() {
             val password = b.passwordEditText.text.toString()
 
             if (!TextUtils.isEmpty(email) && !TextUtils.isEmpty(password)) {
-//                emailHasError = false
-//                passwordHasError = false
-                // If no error is occured, then login, go to home screen and finish this login screen
-                firebaseAuth.signInWithEmailAndPassword(email, password)
-                    .addOnSuccessListener {
-                        Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
+                viewModel.login(email, password)
 
-                        checkRole(it.user!!.uid)
-
-                        /*val intent = Intent(this, HomeActivity::class.java)
-                        intent.putExtra("email", b.emailEditText.text.toString())
-                        intent.putExtra("password", b.passwordEditText.text.toString())
-                        startActivity(intent)
-                        finish()*/
-                    }
-                    /*.addOnCanceledListener {
-                        Toast.makeText(this, "Login cancelled", Toast.LENGTH_SHORT).show()
-                    }*/
-                    .addOnFailureListener {
-                        emailHasError = true
-                        b.emailInputLayout.error = "Enter your registered email"
-
-                        /*when (it) {
-                            is FirebaseAuthInvalidUserException -> {
-                                b.emailInputLayout.error =
-                                    "You have not registered yet. Sign up or re-check your email."
-                                emailHasError = true
-                            }
-                            is FirebaseAuthInvalidCredentialsException -> {
-                                b.passwordInputLayout.error = "Incorrect password."
-                                passwordHasError = true
-                            }
-                            else -> {
-                                Toast.makeText(
-                                    this,
-                                    "Authentication failed \"${it.localizedMessage}\"",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }*/
-                    }
             } else {
                 Toast.makeText(this, "Please check both email and password", Toast.LENGTH_SHORT).show()
-
-//                emailHasError = true
-//                b.emailInputLayout.error = "Please enter valid email"
-//                passwordHasError = true
-//                b.passwordInputLayout.error = "Please enter password"
-                /*if (emailHasError) {
-                    emailHasError = true
-                    b.emailInputLayout.error = "Please enter valid email"
-                } else if (passwordHasError) {
-                    passwordHasError = true
-                    b.passwordInputLayout.error = "Please enter password"
-                }*/
             }
         }
 
@@ -119,48 +66,58 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    private fun observe() {
+        viewModel.login.observe(this) {
+            when (it) {
+                is State.Loading -> {
+                    b.textPleaseWait.visibility = View.VISIBLE
+                }
+                is State.Success -> {
+                    b.textPleaseWait.visibility = View.GONE
+                    Toast.makeText(this, it.data, Toast.LENGTH_SHORT).show()
+
+                    viewModel.handleOnStart(this) { isLoggedIn, isAdmin ->
+                        if (isLoggedIn) {
+                            if (isAdmin) {
+                                startActivity(Intent(applicationContext, HomeAdminActivity::class.java))
+                                finish()
+                            } else {
+                                startActivity(Intent(applicationContext, HomeActivity::class.java))
+                                finish()
+                            }
+                        }
+                    }
+                }
+                is State.Failure -> {
+                    b.textPleaseWait.visibility = View.GONE
+                    Toast.makeText(this, it.error, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_SIGN_UP && resultCode == RESULT_OK) {
             val message = data?.getStringExtra("SIGN UP")
-
+            Toast.makeText(this, "After sign up", Toast.LENGTH_SHORT).show()
         }
     }
 
     override fun onStart() {
         super.onStart()
         // If previously logged in just redirect to home screen
-        if (firebaseAuth.currentUser != null) {
-            val documentReference = firestore.collection("Users")
-                .document(firebaseAuth.currentUser!!.uid)
-            documentReference.get()
-                .addOnSuccessListener {
-                    if (it.getBoolean("adminRole") == true) {
-                        startActivity(Intent(applicationContext, HomeAdminActivity::class.java))
-                        finish()
-                    } else {
-                        startActivity(Intent(applicationContext, HomeActivity::class.java))
-                        finish()
-                    }
+        viewModel.handleOnStart(this) { isLoggedIn, isAdmin ->
+            if (isLoggedIn) {
+                if (isAdmin) {
+                    startActivity(Intent(applicationContext, HomeAdminActivity::class.java))
+                } else {
+                    startActivity(Intent(applicationContext, HomeActivity::class.java))
                 }
-                .addOnFailureListener {
-                    firebaseAuth.signOut()
-                    startActivity(Intent(applicationContext, LoginActivity::class.java))
-                    finish()
-                }
-        }
-    }
-
-    private fun checkRole(uid: String) {
-        val documentReference = firestore.collection("Users").document(uid)
-        documentReference.get().addOnSuccessListener {
-            if (it.getBoolean("adminRole")!!) { // != null
-                startActivity(Intent(this, HomeAdminActivity::class.java))
-                finish()
-            } else {
-                startActivity(Intent(this, HomeActivity::class.java))
-                finish()
-            }
+            } /*else {
+                startActivity(Intent(applicationContext, LoginActivity::class.java))
+            }*/
+//            finish()
         }
     }
 
